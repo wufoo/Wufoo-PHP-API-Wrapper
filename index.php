@@ -5,7 +5,7 @@
  * This is a class meant to help in playing with the API code.  If this package is placed in your httdocs, you can call as shown below...
  * http://localhost/apiwrapper/trunk/?apiKey=B191-RR27-Z8GF-CEVF&subdomain=integrationtest&domain=localhost&method=getUsers
  *
- * @author Timothy S Sabat
+ * @author Timothy S Sabat!
  */
 require_once('WufooApiExamples.php');
 

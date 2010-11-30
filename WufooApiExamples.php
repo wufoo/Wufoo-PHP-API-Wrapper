@@ -76,9 +76,7 @@ class WufooApiExamples {
 	
 	public function entryPost($identifier, $postArray = '') {
 		$wrapper = new WufooApiWrapper($this->apiKey, $this->subdomain, $this->domain);
-		if (!$postArray) {
-			$postArray = array('Field1' => 'Booyah!');
-		}
+		$postArray = array(new WufooSubmitField('Field1', 'Booyah!'), new WufooSubmitField('Field1', '/files/myFile.txt', $isFile = true));
 		return $wrapper->entryPost($identifier, $postArray);	
 	}
 	

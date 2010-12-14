@@ -115,7 +115,6 @@ class WufooCurl {
 	
 	private function checkForCurlErrors() {
 		if(curl_errno($this->curl)) {
-			if ($closeConnection) curl_close($this->curl);
 			throw new WufooException(curl_error($this->curl), curl_errno($this->curl));
 		}
 	}

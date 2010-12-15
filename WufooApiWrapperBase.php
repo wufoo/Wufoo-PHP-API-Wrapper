@@ -18,7 +18,7 @@ class WufooApiWrapperBase {
 		}
 		return $arr;
 	}
-	
+
 	protected function getFullUrl($url) {
 		return 'https://'.$this->subdomain.'.'.$this->domain.'/api/v3/'.$url.'.json';
 	}
@@ -26,15 +26,15 @@ class WufooApiWrapperBase {
 
 
 class WufooCurl {
-	
+
 	public function __construct() {
 		//TIMTODO: set timout
 	}
-	
+
 	public function getAuthenticated($url, $apiKey) {
-		$this->curl = curl_init($url); 
+		$this->curl = curl_init($url);
 		$this->setBasicCurlOptions();
-		
+
 		curl_setopt($this->curl, CURLOPT_USERPWD, $apiKey.':footastical');
 
 		$response = curl_exec($this->curl);
@@ -44,14 +44,14 @@ class WufooCurl {
 		curl_close($this->curl);
 		return $response;
 	}
-	
+
 	public function postAuthenticated($postParams, $url, $apiKey) {
-		$this->curl = curl_init($url); 
+		$this->curl = curl_init($url);
 		$this->setBasicCurlOptions();
-		
+
 		curl_setopt($this->curl, CURLOPT_HTTPHEADER, array('Content-type: multipart/form-data', 'Expect:'));
 		curl_setopt($this->curl, CURLOPT_POST, true);
-		curl_setopt($this->curl, CURLOPT_POSTFIELDS, $postParams);		
+		curl_setopt($this->curl, CURLOPT_POSTFIELDS, $postParams);
 		curl_setopt($this->curl, CURLOPT_USERPWD, $apiKey.':footastical');
 
 		$response = curl_exec($this->curl);
@@ -61,15 +61,15 @@ class WufooCurl {
 		curl_close($this->curl);
 		return $response;
 	}
-	
+
 	//http://stackoverflow.com/questions/2081894/handling-put-delete-arguments-in-php
 	public function putAuthenticated($postParams, $url, $apiKey) {
-		$this->curl = curl_init($url); 
+		$this->curl = curl_init($url);
 		$this->setBasicCurlOptions();
-		
+
 		curl_setopt($this->curl, CURLOPT_HTTPHEADER, array('Content-type: multipart/form-data', 'Expect:'));
 		curl_setopt($this->curl, CURLOPT_CUSTOMREQUEST, 'PUT');
-		curl_setopt($this->curl, CURLOPT_POSTFIELDS, http_build_query($postParams));		
+		curl_setopt($this->curl, CURLOPT_POSTFIELDS, http_build_query($postParams));
 		curl_setopt($this->curl, CURLOPT_USERPWD, $apiKey.':footastical');
 
 		$response = curl_exec($this->curl);
@@ -79,15 +79,15 @@ class WufooCurl {
 		curl_close($this->curl);
 		return $response;
 	}
-	
+
 	//http://stackoverflow.com/questions/2081894/handling-put-delete-arguments-in-php
 	public function deleteAuthenticated($postParams, $url, $apiKey) {
-		$this->curl = curl_init($url); 
+		$this->curl = curl_init($url);
 		$this->setBasicCurlOptions();
-		
+
 		curl_setopt($this->curl, CURLOPT_HTTPHEADER, array('Content-type: multipart/form-data', 'Expect:'));
 		curl_setopt($this->curl, CURLOPT_CUSTOMREQUEST, 'DELETE');
-		curl_setopt($this->curl, CURLOPT_POSTFIELDS, http_build_query($postParams));		
+		curl_setopt($this->curl, CURLOPT_POSTFIELDS, http_build_query($postParams));
 		curl_setopt($this->curl, CURLOPT_USERPWD, $apiKey.':footastical');
 
 		$response = curl_exec($this->curl);
@@ -98,7 +98,7 @@ class WufooCurl {
 		curl_close($this->curl);
 		return $response;
 	}
-	
+
 	public function setBasicCurlOptions() {
 		//http://bugs.php.net/bug.php?id=47030
 		curl_setopt($this->curl, CURLOPT_SSL_VERIFYHOST, false);
@@ -108,17 +108,17 @@ class WufooCurl {
 		curl_setopt($this->curl, CURLOPT_USERAGENT, 'Wufoo API Wrapper');
 		curl_setopt($this->curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
 	}
-	
+
 	private function setResultCodes() {
-		$this->ResultStatus = curl_getinfo($this->curl);		
+		$this->ResultStatus = curl_getinfo($this->curl);
 	}
-	
+
 	private function checkForCurlErrors() {
 		if(curl_errno($this->curl)) {
 			throw new WufooException(curl_error($this->curl), curl_errno($this->curl));
 		}
 	}
-	
+
 	private function checkForGetErrors($response) {
 		switch ($this->ResultStatus['http_code']) {
 			case 200:
@@ -132,7 +132,7 @@ class WufooCurl {
 				break;
 		}
 	}
-	
+
 	private function checkForPutErrors($response) {
 		switch ($this->ResultStatus['http_code']) {
 			case 201:
@@ -146,7 +146,7 @@ class WufooCurl {
 				break;
 		}
 	}
-	
+
 	private function checkForPostErrors($response) {
 		switch ($this->ResultStatus['http_code']) {
 			case 200:
@@ -161,17 +161,17 @@ class WufooCurl {
 				break;
 		}
 	}
-	
+
 	private function throwResponseError($response) {
 		if ($response) {
 			$obj = json_decode($response);
-			throw new WufooException('('.$obj->HTTPCode.') '.$obj->Text, $this->ResultStatus['HTTP_CODE']);
+			throw new WufooException('('.$obj->HTTPCode.') '.$obj->Text, $this->ResultStatus['http_code']);
 		} else {
 			throw new WufooException('(500) This is embarrassing... We did not anticipate this error type.  Please contact support here: support@wufoo.com', 500);
 		}
 		return $response;
 	}
-	
+
 }
 
 /**
@@ -181,11 +181,11 @@ class WufooCurl {
  * @author Timothy S Sabat
  */
 class WufooException extends Exception {
-	
+
 	public function __construct($message, $code) {
 		parent::__construct($message, $code);
 	}
-	
+
 };
 
 ?>

@@ -16,7 +16,10 @@ class WufooApiWrapperBase {
 		foreach ($response->$iterator as $obj) {
 			$arr[$obj->$index] = new $className($obj);
 		}
-		return $arr;
+		if (isset($arr)) {
+			return $arr;
+		}
+		return FALSE;
 	}
 
 	protected function getFullUrl($url) {

@@ -124,6 +124,7 @@ class WufooApiWrapper extends WufooApiWrapperBase {
     * @author Baylor Rae'
     */
 	public function getEntryCountToday($identifier) {
+		$from = "forms";
 		$url = $this->getFullUrl($from.'/'.$identifier) . '?includeTodayCount=true';
 		$this->curl = new WufooCurl();
 		$countObject = json_decode($this->curl->getAuthenticated($url, $this->apiKey));
@@ -145,7 +146,7 @@ class WufooApiWrapper extends WufooApiWrapperBase {
 	 * @return array of Report Value Objects by hash.
 	 * @author Timothy S Sabat
 	 */
-	public function getReports($reportIdentifier) {
+	public function getReports($reportIdentifier = null) {
 		$url = ($reportIdentifier) ? $this->getFullUrl('reports/'.$reportIdentifier) : $this->getFullUrl('reports');
 		return $this->getHelper($url, 'Report', 'Reports');
 	}
@@ -207,11 +208,11 @@ class WufooApiWrapper extends WufooApiWrapperBase {
 	 */
 	public function getComments($formIdentifier, $entryId = null) {
 		if ($entryId) {
-			$url = $this->getFullUrl('forms/'.$formIdentifier.'/comments/'.$entryId);
+			$url = $this->getFullUrl('forms/'.$formIdentifier.'/comments');
 		} else {
 			$url = $this->getFullUrl('forms/'.$formIdentifier.'/comments');
 		}
-		return $this->getHelper($url, 'Comment', 'Comments', 'CommentId');
+		return $this->getHelper($url . '?entryId=' . $entryId, 'Comment', 'Comments', 'CommentId');
 	}
 	
 	/**

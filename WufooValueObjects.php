@@ -3,9 +3,9 @@
 class ValueObject {
 	
 	public function __construct($obj) {
-		if ($obj) {
+		if (isset($obj) && $obj) {
 			foreach ($obj as $key => $value) {
-				$this->setProperty($key, $value, (isset($obj->ID) ? $obj->ID : ''));
+				$this->setProperty($key, $value, (isset($obj->ID) ? $obj->ID : null));
 			}
 		}
 	}

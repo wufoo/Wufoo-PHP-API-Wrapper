@@ -38,12 +38,7 @@ class WufooCurl {
 		
 		curl_setopt($this->curl, CURLOPT_USERPWD, $apiKey.':footastical');
 
-        if ($this->serverHasRestrictions()){
-            $response = $this->curl_exec_follow($this->curl);
-        }
-        else {
-            $response = curl_exec($this->curl);
-        }
+        $response = $this->getResponse();
 		$this->setResultCodes();
 		$this->checkForCurlErrors();
 		$this->checkForGetErrors($response);
@@ -60,12 +55,7 @@ class WufooCurl {
 		curl_setopt($this->curl, CURLOPT_POSTFIELDS, $postParams);		
 		curl_setopt($this->curl, CURLOPT_USERPWD, $apiKey.':footastical');
 
-		if ($this->serverHasRestrictions()){
-            $response = $this->curl_exec_follow($this->curl);
-        }
-        else {
-            $response = curl_exec($this->curl);
-        }
+        $response = $this->getResponse();
 		$this->setResultCodes();
 		$this->checkForCurlErrors();
 		$this->checkForPostErrors($response);
@@ -83,12 +73,7 @@ class WufooCurl {
 		curl_setopt($this->curl, CURLOPT_POSTFIELDS, http_build_query($postParams));		
 		curl_setopt($this->curl, CURLOPT_USERPWD, $apiKey.':footastical');
 
-		if ($this->serverHasRestrictions()){
-            $response = $this->curl_exec_follow($this->curl);
-        }
-        else {
-            $response = curl_exec($this->curl);
-        }
+        $response = $this->getResponse();
 		$this->setResultCodes();
 		$this->checkForCurlErrors();
 		$this->checkForPutErrors($response);
@@ -106,12 +91,7 @@ class WufooCurl {
 		curl_setopt($this->curl, CURLOPT_POSTFIELDS, http_build_query($postParams));		
 		curl_setopt($this->curl, CURLOPT_USERPWD, $apiKey.':footastical');
 
-		if ($this->serverHasRestrictions()){
-            $response = $this->curl_exec_follow($this->curl);
-        }
-        else {
-            $response = curl_exec($this->curl);
-        }
+        $response = $this->getResponse();
 		$this->setResultCodes();
 		$this->checkForCurlErrors();
 		//GET and DELETE both expect 200 response for success
@@ -136,6 +116,13 @@ class WufooCurl {
             curl_setopt($this->curl, CURLOPT_MAXREDIRS, 5);
         }
 	}
+
+    private function getResponse() {
+        if ($this->serverHasRestrictions()){
+            return $this->curl_exec_follow($this->curl);
+        }
+        return curl_exec($this->curl);
+    }
 	
 	private function setResultCodes() {
 		$this->ResultStatus = curl_getinfo($this->curl);		
@@ -204,6 +191,7 @@ class WufooCurl {
 		return $response;
 	}
 
+    // Modified version of function from http://php.net/manual/en/function.curl-setopt.php#102121
     private function curl_exec_follow(/*resource*/ $ch, /*int*/ &$maxredirect = null) {
         $mr = $maxredirect === null ? 5 : intval($maxredirect);
         if ($mr > 0) {

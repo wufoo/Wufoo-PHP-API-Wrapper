@@ -13,6 +13,7 @@ class WufooApiWrapperBase {
 		$response = $this->curl->getAuthenticated($url, $this->apiKey);
 		$response = json_decode($response);
 		$className = 'Wufoo'.$type;
+		$arr = array();
 		foreach ($response->$iterator as $obj) {
 			$arr[$obj->$index] = new $className($obj);
 		}
@@ -37,7 +38,7 @@ class WufooCurl {
 		
 		curl_setopt($this->curl, CURLOPT_USERPWD, $apiKey.':footastical');
 
-		$response = curl_exec($this->curl);
+        $response = $this->getResponse();
 		$this->setResultCodes();
 		$this->checkForCurlErrors();
 		$this->checkForGetErrors($response);
@@ -54,7 +55,7 @@ class WufooCurl {
 		curl_setopt($this->curl, CURLOPT_POSTFIELDS, $postParams);		
 		curl_setopt($this->curl, CURLOPT_USERPWD, $apiKey.':footastical');
 
-		$response = curl_exec($this->curl);
+        $response = $this->getResponse();
 		$this->setResultCodes();
 		$this->checkForCurlErrors();
 		$this->checkForPostErrors($response);
@@ -72,7 +73,7 @@ class WufooCurl {
 		curl_setopt($this->curl, CURLOPT_POSTFIELDS, http_build_query($postParams));		
 		curl_setopt($this->curl, CURLOPT_USERPWD, $apiKey.':footastical');
 
-		$response = curl_exec($this->curl);
+        $response = $this->getResponse();
 		$this->setResultCodes();
 		$this->checkForCurlErrors();
 		$this->checkForPutErrors($response);
@@ -90,7 +91,7 @@ class WufooCurl {
 		curl_setopt($this->curl, CURLOPT_POSTFIELDS, http_build_query($postParams));		
 		curl_setopt($this->curl, CURLOPT_USERPWD, $apiKey.':footastical');
 
-		$response = curl_exec($this->curl);
+        $response = $this->getResponse();
 		$this->setResultCodes();
 		$this->checkForCurlErrors();
 		//GET and DELETE both expect 200 response for success
@@ -104,14 +105,32 @@ class WufooCurl {
 		curl_setopt($this->curl, CURLOPT_SSL_VERIFYHOST, false);
 		curl_setopt($this->curl, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($this->curl, CURLOPT_SSL_VERIFYPEER, false);
-		curl_setopt($this->curl, CURLOPT_FOLLOWLOCATION, true);
 		curl_setopt($this->curl, CURLOPT_USERAGENT, 'Wufoo API Wrapper');
 		curl_setopt($this->curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
+
+        if ($this->serverHasRestrictions()) {
+            curl_setopt($this->curl, CURLOPT_FOLLOWLOCATION, false);
+        }
+        else {
+            curl_setopt($this->curl, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($this->curl, CURLOPT_MAXREDIRS, 5);
+        }
 	}
+
+    private function getResponse() {
+        if ($this->serverHasRestrictions()){
+            return $this->curl_exec_follow($this->curl);
+        }
+        return curl_exec($this->curl);
+    }
 	
 	private function setResultCodes() {
 		$this->ResultStatus = curl_getinfo($this->curl);		
 	}
+
+    private function serverHasRestrictions() {
+        return (ini_get('open_basedir') != '' || ini_get('safe_mode' == 'On'));
+    }
 	
 	private function checkForCurlErrors() {
 		if(curl_errno($this->curl)) {
@@ -171,7 +190,46 @@ class WufooCurl {
 		}
 		return $response;
 	}
-	
+
+    // Modified version of function from http://php.net/manual/en/function.curl-setopt.php#102121
+    private function curl_exec_follow(/*resource*/ $ch, /*int*/ &$maxredirect = null) {
+        $mr = $maxredirect === null ? 5 : intval($maxredirect);
+        if ($mr > 0) {
+            $newurl = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
+
+            $rch = curl_copy_handle($ch);
+            curl_setopt($rch, CURLOPT_HEADER, true);
+            curl_setopt($rch, CURLOPT_NOBODY, true);
+            curl_setopt($rch, CURLOPT_FORBID_REUSE, false);
+            curl_setopt($rch, CURLOPT_RETURNTRANSFER, true);
+            do {
+                curl_setopt($rch, CURLOPT_URL, $newurl);
+                $header = curl_exec($rch);
+                if (curl_errno($rch)) {
+                    $code = 0;
+                } else {
+                    $code = curl_getinfo($rch, CURLINFO_HTTP_CODE);
+                    if ($code == 301 || $code == 302) {
+                        preg_match('/Location:(.*?)\n/', $header, $matches);
+                        $newurl = trim(array_pop($matches));
+                    } else {
+                        $code = 0;
+                    }
+                }
+            } while ($code && --$mr);
+            curl_close($rch);
+            if (!$mr) {
+                if ($maxredirect === null) {
+                    trigger_error('Too many redirects. When following redirects, libcurl hit the maximum amount.', E_USER_WARNING);
+                } else {
+                    $maxredirect = 0;
+                }
+                return false;
+            }
+            curl_setopt($ch, CURLOPT_URL, $newurl);
+        }
+        return curl_exec($ch);
+    }
 }
 
 /**

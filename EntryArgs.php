@@ -26,7 +26,7 @@ class EntryArgs {
 	 */
 	public function setFilter($id, $operator, $value) {
 		$filter = new Filter($id, $operator, $value);
-		$filters[] = $filter->getFilterString();
+		array_push($this->filters, $filter);
 	}
 	
 	/**
@@ -37,7 +37,7 @@ class EntryArgs {
 	 */
 	public function getArgsAsQueryString() {
 		foreach ($this as $key => $value) {
-			if(is_array($key)) {
+			if($key == 'filters' && is_array($value)) {
 				$ret.= $this->getNumeredFilters().'&';
 			} else {
 				if ($value) $ret.= $key.'='.$value.'&';			
@@ -49,7 +49,7 @@ class EntryArgs {
 	private function getNumeredFilters() {
 		$count = 1;
 		foreach ($this->filters as $filter) {
-			$ret.='Filter'.$count.'='.$filter.'&';
+			$ret.='Filter'.$count.'='.$filter->getFilterString().'&';
 			$count++;
 		}
 		return rtrim($ret, '&');

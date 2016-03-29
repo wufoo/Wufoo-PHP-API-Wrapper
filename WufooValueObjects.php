@@ -211,8 +211,7 @@ class WufooSubmitField {
 	
 	public function getValue() {
 		if ($this->isFile) {
-			$curl_file = curl_file_create($this->value, mime_content_type($this->value), pathinfo($this->value, PATHINFO_BASENAME));
-			return $curl_file;
+			return curl_file_create($this->value, mime_content_type($this->value), pathinfo($this->value, PATHINFO_BASENAME));
 		} else {
 			return $this->value;
 		}
